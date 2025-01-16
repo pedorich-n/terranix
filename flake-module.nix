@@ -103,13 +103,13 @@
                                 The exposed, wrapped Terraform.
                               '';
                               default = pkgs.writeShellApplication {
-                                name = "terraform";
+                                name = submod.config.terraformWrapper.package.meta.mainProgram;
                                 runtimeInputs = [ submod.config.terraformWrapper.package ] ++ submod.config.terraformWrapper.extraRuntimeInputs;
                                 text = ''
                                   mkdir -p ${submod.config.workdir}
                                   cd ${submod.config.workdir}
                                   ${submod.config.terraformWrapper.prefixText}
-                                  terraform "$@"
+                                  ${submod.config.terraformWrapper.package.meta.mainProgram} "$@"
                                   ${submod.config.terraformWrapper.suffixText}
                                 '';
                               };
@@ -130,22 +130,24 @@
                                       ${text}
                                     '';
                                   };
+
+                                  tfBinaryName = submod.config.result.terraformWrapper.meta.mainProgram;
                                 in
                                 {
                                   init = mkTfScript "init" ''
-                                    terraform init
+                                    ${tfBinaryName} init
                                   '';
                                   apply = mkTfScript "apply" ''
-                                    terraform init
-                                    terraform apply
+                                    ${tfBinaryName} init
+                                    ${tfBinaryName} apply
                                   '';
                                   plan = mkTfScript "plan" ''
-                                    terraform init
-                                    terraform plan
+                                    ${tfBinaryName} init
+                                    ${tfBinaryName} plan
                                   '';
                                   destroy = mkTfScript "destroy" ''
-                                    terraform init
-                                    terraform destroy
+                                    ${tfBinaryName} init
+                                    ${tfBinaryName} destroy
                                   '';
                                   terraform = submod.config.result.terraformWrapper;
                                 };
